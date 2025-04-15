@@ -109,7 +109,7 @@ func (v *Video) encodeToMP4() (string, error) {
 		b := path.Base(v.InputFile)
 		baseFileName = strings.TrimSuffix(b, filepath.Ext(b))
 	} else {
-		// TODO: Generate random file name
+		baseFileName = RandomString(10)
 	}
 	err := v.Encoder.Engine.EncodeToMP4(v, baseFileName)
 	if err != nil {
@@ -130,7 +130,7 @@ func (v *Video) encodeToHLS() (string, error) {
 		b := path.Base(v.InputFile)
 		baseFileName = strings.TrimSuffix(b, filepath.Ext(b))
 	} else {
-		// TODO: Generate random file name
+		baseFileName = RandomString(10)
 	}
 
 	err := v.Encoder.Engine.EncodeToHLS(v, baseFileName)
