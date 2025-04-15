@@ -74,6 +74,20 @@ func (v *Video) encode() {
 
 			fileName = fmt.Sprintf("%s.mp4", name)
 		}
+	case "hls":
+		{
+			// encode the video
+			fmt.Println("v.encode(): About to encode to MP4", v.ID)
+			name, err := v.encodeToHLS()
+
+			if err != nil {
+				// send inforamtion to the notifyChan
+				v.sendToNotifyChan(false, "", fmt.Sprintf("encode failed for %d: %s", v.ID, err.Error()))
+				return
+			}
+
+			fileName = fmt.Sprintf("%s.m3u8", name)
+		}
 	default:
 		{
 			fmt.Println("v.encode(): error trying to encode video", v.ID)
@@ -106,6 +120,29 @@ func (v *Video) encodeToMP4() (string, error) {
 
 	return baseFileName, nil
 }
+
+func (v *Video) encodeToHLS() (string, error) {
+	baseFileName := ""
+
+	fmt.Println("v.encodeToHLS: about to try to encode video id", v.ID)
+	if !v.Options.RenameOutput {
+		// Get the base file name
+		b := path.Base(v.InputFile)
+		baseFileName = strings.TrimSuffix(b, filepath.Ext(b))
+	} else {
+		// TODO: Generate random file name
+	}
+
+	err := v.Encoder.Engine.EncodeToHLS(v, baseFileName)
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println("v.encodeToHLS: successfully encoded video id", v.ID)
+
+	return baseFileName, nil
+}
+
 func (v *Video) sendToNotifyChan(successful bool, fileName, message string) {
 	fmt.Println("v.sendToNotifyChan: sending message to notifyChan for video id", v.ID)
 	v.NotifyChan <- ProcessingMessage{
